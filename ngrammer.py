@@ -263,7 +263,7 @@ def compute_distance(a, b):
 
 #sample usage
 
-z = zipfile.ZipFile(path = "texts.zip")
+z = zipfile.ZipFile("texts.zip")
 z.extractall()
 
 corpus = Corpus()
