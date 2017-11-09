@@ -10,6 +10,8 @@ Notes:
 The following script provides a mechanism for creating user-defined
 ngrams in text documents.
 
+
+
 It consists two classes:
     1) Document - a class which contains text, and from which n-grams, and 
     frequencies can be calculated.
@@ -20,6 +22,10 @@ It consists two classes:
     It also contains a summarise method to calculate the average ngram
     co-occurence for a particular author.
     
+    The use of the self.author_docs dictionary is designed to allow avoid 
+    looping over the self.documents dictionary when calculating the 
+    average and standard deviation for a particular author.
+        
 Regex compilation:
     The regular expressions to strip punctuation and handle newline or tab 
     characters was set as a constant at the top of the Document to avoid 
@@ -38,6 +44,10 @@ Summarise/Calc_stats methods within Corpus:
     average and standard deviation calculations are not affected by the 
     location of these zero values.
     
+Author names
+    The insert_document method takes the author name from the first character
+    of the filename. However, the function could also be used to add extra
+    documents with other authors.
 """
 
 
@@ -70,7 +80,14 @@ class Document(object):
        
     
     def __str__(self):
-           return str(self.ngrams)
+        output = """Document():\n
+        Doc id: {0}\n
+        Text: {1} {2}\n""".format(self.doc_id, self.text[:100], "...")
+        if self.ngrams:
+            output += """N-grams: {0} {2}\n
+        N-gram freqs: {1} {2}""".format(self.ngrams[:5],
+                                        str(self.ngram_freq)[:100], "...")
+        return output
     
     
     def preprocess_document(self, word_ngrams):
@@ -114,23 +131,20 @@ class Document(object):
     def set_ngrams(self, ngram_len):
         """Wrapper function to create and count ngrams of n-length"""
         self.ngrams = self.create_ngrams(ngram_len, self.text)
-        
         self.ngram_freq = self.count_freq()
     
     
 class Corpus:
     """Container class to hold Documents, and provides methods to insert 
-    documents and to summarise by defined author
+    documents and to summarise by defined author.
     """
-
-
+    
     def __init__(self):
         self.documents = {}
         self.summary = {}
         self.doc_count = 0
         self.author_docs = {}
-
-    
+ 
     def __str__(self):
            output = "Corpus()\nAuthor \t\tNumber of documents"
            total = 0
@@ -207,14 +221,13 @@ class Corpus:
                                                          #ngrams in document
             for k, v in doc.items():
                 if k in counts.keys():
-                    counts[k]['frequency'].append(doc.get(k,0))
-                    counts[k]['total_freq'] += doc.get(k,0)
+                    counts[k]['frequency'].append(doc.get(k, 0))
+                    counts[k]['total_freq'] += doc.get(k, 0)
                     counts[k]['num_ngrams'].append(total_ngrams)
                 else:
-                    counts[k] = {'frequency': [doc.get(k,0)], 
-                                "total_freq": doc.get(k,0),
+                    counts[k] = {'frequency': [doc.get(k, 0)], 
+                                "total_freq": doc.get(k, 0),
                                 'num_ngrams': [total_ngrams]}
-        
         #Sort the dictionary on total_freq to return top n-occuring keys
         top_ngram_keys = sorted(counts, 
                                 key=lambda x: counts[x]['total_freq'], 
@@ -222,13 +235,12 @@ class Corpus:
         #Then calculate mean and standard deviation on this subset.
         result = {k: self.calc_stats(counts[k]['frequency'], 
                                      num_documents) for k in top_ngram_keys}
-        
-        
         #Insert summary into dictionary
         self.summary.update({author: result })
         return result
     
     def print_summary(self):
+        """Outputs results of summary method for standard output."""
         output = "\n\n"
         for author in self.summary.keys(): 
             output += "Author: {0}\n---------\n".format(author)
@@ -257,7 +269,7 @@ def compute_distance(a, b):
     for key in a.keys():
         if key in b.keys():
             sums += pow(a[key][0] - b[key][0], 2)
-    return sums **.5
+    return sums ** .5
 
 
 
@@ -284,11 +296,9 @@ print(corpus) #See sample output below
 """Looking over differences between the average ngram occurences for C, the 
 mystery document, and the two labelled collections, it would appear there
 is more commonality between Author B than Author A. The best parameters
-would appear to be for two-word ngrams, and four-character ngrams."""
+would appear to be for two-word ngrams, and four-character ngrams.
 
-
-
-"""A second method involved calculating the Eucldiean distance between the 
+A second method involved calculating the Eucldiean distance between the 
 average occurences of a set of the most-frequently occurring ngrams bewteen
 one of the sample collections and the single document.
 
@@ -310,7 +320,7 @@ between collections A and B. Nested loop will run over n-length ngrams between
 1 and 20, and run over word and character ngrams.""")
 
 
-results = {"A":0, "B":0}
+results = {"A": 0, "B": 0}
 non_zero_tests = 0
 
 for boolean in [True, False]:
