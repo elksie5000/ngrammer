@@ -146,17 +146,17 @@ class Corpus:
         self.author_docs = {}
  
     def __str__(self):
-           output = "Corpus()\nAuthor \t\tNumber of documents"
-           total = 0
-           for k in self.author_docs.keys():
-               count = len(self.author_docs[k])
-               output += "\n{0}: \t\t{1}".format(k,
-                         str(count))
-               total += count
-           output += "\nTotal: \t\t{0}".format(total)
-           if self.summary:
-               output += self.print_summary()
-           return output
+        output = "Corpus()\nAuthor \t\tNumber of documents"
+        total = 0
+        for k in self.author_docs.keys():
+            count = len(self.author_docs[k])
+            output += "\n{0}: \t\t{1}".format(k,
+                       str(count))
+            total += count
+        output += "\nTotal: \t\t{0}".format(total)
+        if self.summary:
+            output += self.print_summary()
+        return output
 
     def load_corpus(self, path= None, exclusion_list=None):    
         """Returns a Corpus of Document objects based sample texts.
@@ -279,6 +279,7 @@ z = zipfile.ZipFile("texts.zip")
 z.extractall()
 
 corpus = Corpus()
+#Exclusion_list is a list of filenames to ignore from loaded zipfile
 corpus.load_corpus(exclusion_list=["readme.txt"])
 #Set the model to 4-char-grams
 corpus.set_model(4, False)
